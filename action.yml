@@ -19,14 +19,14 @@ runs:
       run: |
         curl -L https://common-lisp.net/project/asdf/archives/asdf.lisp > ~/asdf.lisp
     - name: install quicklisp
-        shell: bash
-        run: |
-          curl -L https://beta.quicklisp.org/quicklisp.lisp > ~/install-quicklisp.lisp
-          sbcl --disable-debugger \
-               --load ~/asdf.lisp \
-               --load ~/install-quicklisp.lisp \
-               --eval '(quicklisp-quickstart:install)' \
-               --quit
+      shell: bash
+      run: |
+        curl -L https://beta.quicklisp.org/quicklisp.lisp > ~/install-quicklisp.lisp
+        sbcl --disable-debugger \
+             --load ~/asdf.lisp \
+             --load ~/install-quicklisp.lisp \
+             --eval '(quicklisp-quickstart:install)' \
+             --quit
     - uses: actions/checkout@v2
     # load (i.e. compile) and test in separate steps for better error-reporting
     - name: load system
