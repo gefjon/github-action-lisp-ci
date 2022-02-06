@@ -5,8 +5,8 @@ inputs:
     description: 'The name of the system to test'
     required: true
   test-system-name:
-    description: 'The name of the test system, if not just SYSTEM-NAME/test'
-    default: '${{ inputs.system-name }}/test'
+    description: 'The name of the test system, so we can load its deps'
+    required: true
 runs:
   using: "composite"
   steps:
