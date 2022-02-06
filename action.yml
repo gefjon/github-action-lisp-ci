@@ -1,0 +1,60 @@
+name: 'Common Lisp ASDF CI'
+description: 'Invoke ASDF:TEST-SYSTEM'
+inputs:
+  system-name:
+    description: 'The name of the system to test'
+    required: true
+  test-system-name:
+    description: 'The name of the test system, if not just SYSTEM-NAME/test'
+    default: '${{ inputs.system-name }}/test'
+runs:
+  using: "composite"
+  steps:
+    - name: install sbcl
+      shell: bash
+      run: |
+        sudo apt-get install -y sbcl
+    - name: fetch latest asdf
+      shell: bash
+      run: |
+        curl -L https://common-lisp.net/project/asdf/archives/asdf.lisp > ~/asdf.lisp
+    - name: install quicklisp
+        shell: bash
+        run: |
+          curl -L https://beta.quicklisp.org/quicklisp.lisp > ~/install-quicklisp.lisp
+          sbcl --disable-debugger \
+               --load ~/asdf.lisp \
+               --load ~/install-quicklisp.lisp \
+               --eval '(quicklisp-quickstart:install)' \
+               --quit
+    - uses: actions/checkout@v2
+    # load (i.e. compile) and test in separate steps for better error-reporting
+    - name: load system
+      shell: bash
+      run: |
+        sbcl --disable-debugger \
+             --load ~/asdf.lisp \
+             --load ~/quicklisp/setup.lisp \
+             --eval "(asdf:initialize-source-registry '(:source-registry (:directory \"${{ github.workspace }}/\") :inherit-configuration))" \
+             --eval '(ql:quickload "${{ inputs.system-name }}")' \
+             --quit
+    # quickload the test system to install its deps
+    - name: load tests
+      shell: bash
+      run: |
+        sbcl --disable-debugger \
+             --load ~/asdf.lisp \
+             --load ~/quicklisp/setup.lisp \
+             --eval "(asdf:initialize-source-registry '(:source-registry (:directory \"${{ github.workspace }}/\") :inherit-configuration))" \
+             --eval '(ql:quickload "${{ inputs.test-system-name }}")' \
+             --quit
+    - name: test system
+      shell: bash
+      run: |
+        sbcl --disable-debugger \
+             --load ~/asdf.lisp \
+             --load ~/quicklisp/setup.lisp \
+             --eval "(asdf:initialize-source-registry '(:source-registry (:directory \"${{ github.workspace }}/\") :inherit-configuration))" \
+             --eval '(asdf:test-system "${{ inputs.system-name }}")' \
+             --quit
+
