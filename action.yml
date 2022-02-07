@@ -28,6 +28,8 @@ runs:
              --eval '(quicklisp-quickstart:install)' \
              --quit
     - uses: actions/checkout@v2
+      with:
+        path: ${{ github.repository }}
     # load (i.e. compile) and test in separate steps for better error-reporting
     - name: load system
       shell: bash
@@ -35,7 +37,7 @@ runs:
         sbcl --disable-debugger \
              --load ~/asdf.lisp \
              --load ~/quicklisp/setup.lisp \
-             --eval "(asdf:initialize-source-registry '(:source-registry (:directory \"${{ github.workspace }}/\") :inherit-configuration))" \
+             --eval "(asdf:initialize-source-registry '(:source-registry (:tree \"${{ github.workspace }}/\") :inherit-configuration))" \
              --eval '(ql:quickload "${{ inputs.system-name }}")' \
              --quit
     # quickload the test system to install its deps
@@ -45,7 +47,7 @@ runs:
         sbcl --disable-debugger \
              --load ~/asdf.lisp \
              --load ~/quicklisp/setup.lisp \
-             --eval "(asdf:initialize-source-registry '(:source-registry (:directory \"${{ github.workspace }}/\") :inherit-configuration))" \
+             --eval "(asdf:initialize-source-registry '(:source-registry (:tree \"${{ github.workspace }}/\") :inherit-configuration))" \
              --eval '(ql:quickload "${{ inputs.test-system-name }}")' \
              --quit
     - name: test system
@@ -54,7 +56,7 @@ runs:
         sbcl --disable-debugger \
              --load ~/asdf.lisp \
              --load ~/quicklisp/setup.lisp \
-             --eval "(asdf:initialize-source-registry '(:source-registry (:directory \"${{ github.workspace }}/\") :inherit-configuration))" \
+             --eval "(asdf:initialize-source-registry '(:source-registry (:tree \"${{ github.workspace }}/\") :inherit-configuration))" \
              --eval '(asdf:test-system "${{ inputs.system-name }}")' \
              --quit
 
